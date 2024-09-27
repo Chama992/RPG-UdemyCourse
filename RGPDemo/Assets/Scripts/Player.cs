@@ -3,21 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class Player : MonoBehaviour
+public class Player : Entity
 {
     // Start is called before the first frame update
-    private Rigidbody2D rb;
-    private Animator animator;
+
     private float xInput;
-    private int facingDir = 1;
-    private bool facingRight = true;
+
     [Header("MovingInfo")]
     [SerializeField]private float jumpForce;
     [SerializeField]private float moveSpeed;
-    private bool isGround;
-    [Header("CollisionInfo")]
-    [SerializeField]private float groundCheckDistance;
-    [SerializeField] private LayerMask whatIsGrount;
     [Header("DashInfo")]
     [SerializeField] private float dashDuration;
     [SerializeField] private float dashSpeed;
@@ -29,18 +23,17 @@ public class Player : MonoBehaviour
     private float comboTimeWindow;
     private bool isAttacking;
     private int attackCombo;
-    void Start()
+    protected override void Start()
     { 
-        rb = GetComponent<Rigidbody2D>();
-        animator = GetComponentInChildren<Animator>();
+        base.Start();
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
-        CheckInput();
+        base.Update();
         MoveMent();
-        ColissionChecks();
+        CheckInput();
         dashTime -= Time.deltaTime;
         comboTimeWindow -= Time.deltaTime;
         dashCoolDownTimer -= Time.deltaTime;
@@ -51,7 +44,6 @@ public class Player : MonoBehaviour
         }
         FlipController();
         AnimatorController();
-
     }
 
     private void DashAbility()
@@ -62,15 +54,6 @@ public class Player : MonoBehaviour
             dashTime = dashDuration;
         }
     }
-
-    /// <summary>
-    /// check isground
-    /// </summary>
-    private void ColissionChecks()
-    {
-        isGround = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatIsGrount);
-    }
-
     /// <summary>
     /// check input
     /// </summary>
@@ -129,15 +112,7 @@ public class Player : MonoBehaviour
         animator.SetBool("isAttacking", isAttacking);
         animator.SetInteger("attackCombo", attackCombo);
     }
-    /// <summary>
-    /// flip the sprite
-    /// </summary>
-    private void Flip()
-    {
-        facingDir = facingDir * -1;
-        facingRight = !facingRight;
-        transform.Rotate(0, 180, 0);
-    }
+
     /// <summary>
     /// controll the flip 
     /// </summary>
@@ -147,13 +122,6 @@ public class Player : MonoBehaviour
             Flip();
         else if (rb.velocity.x < 0 && facingRight)        
             Flip();        
-    }
-    /// <summary>
-    /// draw a line between player and ground
-    /// </summary>
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawLine(transform.position, new Vector3(transform.position.x, transform.position.y - groundCheckDistance));
     }
     public void QuitAttack()
     {
