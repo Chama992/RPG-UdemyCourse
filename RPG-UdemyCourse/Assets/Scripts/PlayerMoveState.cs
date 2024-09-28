@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMoveState : PlayerState
+public class PlayerMoveState : PlayerGroundedState
 {
     public PlayerMoveState(Player _player, PlayerStateMachine _playerStateMachine, string _animBoolName) : base(_player, _playerStateMachine, _animBoolName)
     {
@@ -21,9 +21,8 @@ public class PlayerMoveState : PlayerState
     public override void Update()
     {
         base.Update();
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
+        player.SetVelocity(xInput,rb.velocity.y);
+        if (xInput == 0)
             StateMachine.ChangeState(player.IdleState);
-        }
     }
 }

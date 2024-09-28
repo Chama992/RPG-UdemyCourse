@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerIdleState : PlayerState
+public class PlayerIdleState : PlayerGroundedState
 {
     public PlayerIdleState(Player _player, PlayerStateMachine _playerStateMachine, string _animBoolName) : base(_player, _playerStateMachine, _animBoolName)
     {
@@ -21,9 +21,7 @@ public class PlayerIdleState : PlayerState
     public override void Update()
     {
         base.Update();
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            StateMachine.ChangeState(player.MoveState); 
-        }
+        if (xInput != 0)
+            StateMachine.ChangeState(player.MoveState);
     }
 }

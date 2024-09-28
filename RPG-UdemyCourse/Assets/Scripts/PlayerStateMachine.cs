@@ -14,8 +14,10 @@ public class PlayerStateMachine
 
     public void ChangeState(PlayerState _newState)
     {
+        //Debug.Log($"exit the {currentState.GetType().Name} state");
         currentState.Exit();
         currentState = _newState;
         currentState.Enter();
+        //Debug.Log($"enter the {currentState.GetType().Name} state");
     }
 }
