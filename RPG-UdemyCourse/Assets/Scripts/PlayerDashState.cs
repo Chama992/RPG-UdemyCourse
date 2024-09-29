@@ -24,7 +24,8 @@ public class PlayerDashState : PlayerState
     {
         base.Update();
         rb.velocity = new Vector2(player.dashSpeed * player.dashDir, 0);
-        stateTimer -= Time.deltaTime;
+        if (!player.IsGroundChecked() && player.IsWallChecked())
+            StateMachine.ChangeState(player.WallSlideState);
         if (stateTimer < 0)
             StateMachine.ChangeState(player.IdleState);
     }

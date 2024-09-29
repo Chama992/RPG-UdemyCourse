@@ -13,6 +13,7 @@ public class PlayerState
     protected float yInput;
     protected Rigidbody2D rb;
     protected float stateTimer;
+    protected bool aniTriggerCalled; 
     
     public PlayerState(Player _player, PlayerStateMachine _playerStateMachine, string _animBoolName)
     { 
@@ -25,11 +26,13 @@ public class PlayerState
     {
         player.Anim.SetBool(animBoolName, true);
         rb = player.Rb;
+        aniTriggerCalled = false;
         //Debug.Log($"enter the {StateMachine.currentState.GetType().Name} state");
     }
 
     public virtual void Update()
     {
+        stateTimer -= Time.deltaTime;
         xInput = Input.GetAxisRaw("Horizontal");
         yInput = Input.GetAxisRaw("Vertical");
         player.Anim.SetFloat("yVelocity",  rb.velocity.y);
@@ -41,4 +44,8 @@ public class PlayerState
         //Debug.Log($"exit the {StateMachine.currentState.GetType().Name} state");
     }
 
-}
+    public void AnimationFinishTrigger()
+    {
+        aniTriggerCalled = true;
+    }
+}   

@@ -16,7 +16,6 @@ public class PlayerAirState : PlayerState
     public override void Exit()
     {
         base.Exit();
-        rb.velocity = Vector2.zero;
     }
 
     public override void Update()

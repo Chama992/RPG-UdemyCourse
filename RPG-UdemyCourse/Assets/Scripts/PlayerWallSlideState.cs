@@ -21,12 +21,19 @@ public class PlayerWallSlideState : PlayerState
     public override void Update()
     {
         base.Update();
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            StateMachine.ChangeState(player.WallJumpState);
+            return; //avoid this frame interupted by following check
+        }
         if (xInput != 0 && player.facingDir != xInput)
             StateMachine.ChangeState(player.IdleState);
-        if (yInput != 0)
-            rb.velocity = new Vector2(0, rb.velocity.y * player.WallSlideYFastSpeedCoefficient);
-        else 
-            rb.velocity = new Vector2(0, rb.velocity.y * player.WallSlideYSlowSpeedCoefficient);
+        if (yInput < 0)
+            rb.velocity = new Vector2(0, rb.velocity.y * player.wallSlideYFastSpeedCoefficient);
+        else if (yInput > 0)
+            rb.velocity = new Vector2(0, rb.velocity.y * player.wallSlideYSlowSpeedCoefficient); // climb?
+        else
+            rb.velocity = new Vector2(0, rb.velocity.y * player.wallSlideYSlowSpeedCoefficient);
         if (player.IsGroundChecked())
             StateMachine.ChangeState(player.IdleState);
     }

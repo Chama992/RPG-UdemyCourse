@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    public bool IsBusy { get; private set; }
     #region Components
     public Animator Anim { get; private set; }
     public Rigidbody2D Rb { get; private set; }
@@ -16,6 +17,8 @@ public class Player : MonoBehaviour
     public PlayerJumpState JumpState { get; private set; }
     public PlayerDashState DashState { get; private set; }
     public PlayerWallSlideState WallSlideState { get; private set; }
+    public PlayerWallJumpState WallJumpState { get; private set; }
+    public PlayerPrimaryAttackState PrimaryAttackState { get; private set; }
     #endregion
     [Header("Move Info")]
     [SerializeField] public float moveSpeed;
@@ -23,8 +26,10 @@ public class Player : MonoBehaviour
     [SerializeField] public float jumpForce;
     [SerializeField] public float airMoveSpeedCoefficient;
     [Header("WallSlide Info")]
-    [SerializeField] public float WallSlideYSlowSpeedCoefficient;
-    [SerializeField] public float WallSlideYFastSpeedCoefficient;
+    [SerializeField] public float wallSlideYSlowSpeedCoefficient;
+    [SerializeField] public float wallSlideYFastSpeedCoefficient;
+    [SerializeField] public float wallJumpXMoveCoefficient;
+    [SerializeField] public float wallJumpDuration;
     [Header("Dash Info")]
     [SerializeField] public float dashDuration;
     [SerializeField] public float dashSpeed;
@@ -48,6 +53,8 @@ public class Player : MonoBehaviour
         JumpState = new PlayerJumpState(this, StateMachine, "Jump");
         DashState = new PlayerDashState(this, StateMachine, "Dash");
         WallSlideState = new PlayerWallSlideState(this, StateMachine, "WallSlide");
+        WallJumpState = new PlayerWallJumpState(this, StateMachine, "Jump");
+        PrimaryAttackState = new PlayerPrimaryAttackState(this, StateMachine, "Attack");
     }
 
     private void Start()
@@ -61,7 +68,12 @@ public class Player : MonoBehaviour
         StateMachine.currentState.Update();
         CheckDashActive();
     }
-
+    public IEnumerator BusyFor(float _seconds)
+    {
+        IsBusy = true;
+        yield return new WaitForSeconds(_seconds);
+        IsBusy = false;
+    }
     public bool IsGroundChecked() => Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckDistance, whatIsGround);
 
     public bool IsWallChecked() => Physics2D.Raycast(wallCheck.position, Vector2.right * facingDir, wallCheckDistance, whatIsGround);
@@ -93,6 +105,8 @@ public class Player : MonoBehaviour
     }
     public void CheckDashActive()
     {
+        if (this.IsWallChecked())
+            return;
         dashUsageTimer -= Time.deltaTime;
         if (Input.GetKeyDown(KeyCode.LeftShift) && dashUsageTimer < 0)
         {
@@ -104,6 +118,7 @@ public class Player : MonoBehaviour
                 Flip();
             StateMachine.ChangeState(this.DashState);
         }
-
     }
+
+    public void AnimationTrigger() => this.StateMachine.currentState.AnimationFinishTrigger();
 }
