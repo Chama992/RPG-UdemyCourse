@@ -16,14 +16,18 @@ public class PlayerDashState : PlayerState
 
     public override void Exit()
     {
-        rb.velocity = new Vector2(0, rb.velocity.y);
+        // return the velocity
+        player.SetVelocity(0, rb.velocity.y);
+        //rb.velocity = new Vector2(0, rb.velocity.y);
         base.Exit();
     }
 
     public override void Update()
     {
         base.Update();
-        rb.velocity = new Vector2(player.dashSpeed * player.dashDir, 0);
+        //while dashing, y velocity dont change
+        player.SetVelocity(player.dashSpeed * player.dashDir, 0);
+        //rb.velocity = new Vector2(player.dashSpeed * player.dashDir, 0);
         if (!player.IsGroundChecked() && player.IsWallChecked())
             StateMachine.ChangeState(player.WallSlideState);
         if (stateTimer < 0)

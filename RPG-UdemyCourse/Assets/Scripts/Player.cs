@@ -24,17 +24,19 @@ public class Player : MonoBehaviour
     [SerializeField] public float moveSpeed;
     [Header("JumpFall Info")]
     [SerializeField] public float jumpForce;
-    [SerializeField] public float airMoveSpeedCoefficient;
+    [SerializeField] public float airMoveSpeed;
     [Header("WallSlide Info")]
     [SerializeField] public float wallSlideYSlowSpeedCoefficient;
     [SerializeField] public float wallSlideYFastSpeedCoefficient;
-    [SerializeField] public float wallJumpXMoveCoefficient;
+    [SerializeField] public float wallJumpXMoveSpeed;
     [SerializeField] public float wallJumpDuration;
     [Header("Dash Info")]
     [SerializeField] public float dashDuration;
     [SerializeField] public float dashSpeed;
     [SerializeField] private float dashCoolDown;
     private float dashUsageTimer;
+    [Header("Attack Info")]
+    [SerializeField] public Vector2[] attackMove;
     public float dashDir { get; private set; }
     [Header("CollisionCheck Info")]
     [SerializeField] private Transform groundCheck;
@@ -46,6 +48,7 @@ public class Player : MonoBehaviour
     public bool facingRight { get; private set; } = true;
     private void Awake()
     {
+        ///use statemachine,player can switch to any state
         StateMachine = new PlayerStateMachine();
         IdleState = new PlayerIdleState(this, StateMachine, "Idle");
         MoveState = new PlayerMoveState(this, StateMachine, "Move");
@@ -68,34 +71,60 @@ public class Player : MonoBehaviour
         StateMachine.currentState.Update();
         CheckDashActive();
     }
+    /// <summary>
+    /// make player busy,used to not let player to do other thing 
+    /// </summary>
+    /// <param name="_seconds"></param>
+    /// <returns></returns>
     public IEnumerator BusyFor(float _seconds)
     {
         IsBusy = true;
         yield return new WaitForSeconds(_seconds);
         IsBusy = false;
     }
+    #region Collision
+    /// <summary>
+    /// check if player on the ground
+    /// </summary>
+    /// <returns></returns>
     public bool IsGroundChecked() => Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckDistance, whatIsGround);
-
+    /// <summary>
+    /// check if player near or on the wall
+    /// </summary>
+    /// <returns></returns>
     public bool IsWallChecked() => Physics2D.Raycast(wallCheck.position, Vector2.right * facingDir, wallCheckDistance, whatIsGround);
 
+    #endregion
+    #region Velocity
+    /// <summary>
+    /// change player's velocity
+    /// </summary>
+    /// <param name="_xVelocity"></param>
+    /// <param name="_yVelocity"></param>
     public void SetVelocity( float _xVelocity, float _yVelocity)
     {
-        Rb.velocity =new Vector2(_xVelocity * moveSpeed, _yVelocity);
+        Rb.velocity =new Vector2(_xVelocity, _yVelocity);
         FlipControl(_xVelocity);
     }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawLine(groundCheck.position,new Vector3(groundCheck.position.x, groundCheck.position.y - groundCheckDistance));
-        Gizmos.DrawLine(wallCheck.position,new Vector3(wallCheck.position.x + wallCheckDistance, wallCheck.position.y));
-    }
-
+    /// <summary>
+    /// remove the player's velocity Don't mOVE 
+    /// </summary>
+    public void ZeroVelocity() => Rb.velocity = Vector2.zero;
+    #endregion
+    #region Flip
+    /// <summary>
+    /// just like what the method'name ,just flip
+    /// </summary>
     private void Flip()
     {
         facingDir *= -1;
         facingRight = !facingRight;
         transform.Rotate(0, 180, 0);
     }
+    /// <summary>
+    /// check if player really need to flip
+    /// </summary>
+    /// <param name="_x"></param>
     private void FlipControl(float _x)
     {
         if (_x > 0 && !facingRight)
@@ -103,14 +132,19 @@ public class Player : MonoBehaviour
         else if ( _x < 0 && facingRight)
             Flip();
     }
+    #endregion
+    /// <summary>
+    /// dash has the highest priority,so this method born
+    /// </summary>
     public void CheckDashActive()
     {
-        if (this.IsWallChecked())
+        if (this.IsWallChecked()) //near wall can't dash
             return;
-        dashUsageTimer -= Time.deltaTime;
-        if (Input.GetKeyDown(KeyCode.LeftShift) && dashUsageTimer < 0)
+        dashUsageTimer -= Time.deltaTime;//use for cooldown
+        if (Input.GetKeyDown(KeyCode.LeftShift) && dashUsageTimer < 0) // press lshift and is't cooldown
         {
             dashUsageTimer = dashCoolDown;
+            // dash to what i press ,if not pressed dash to facingdir
             dashDir = Input.GetAxisRaw("Horizontal");
             if (dashDir == 0)
                 dashDir = facingDir;
@@ -119,6 +153,16 @@ public class Player : MonoBehaviour
             StateMachine.ChangeState(this.DashState);
         }
     }
-
+    /// <summary>
+    /// use for check the currentstate anim finished?
+    /// </summary>
     public void AnimationTrigger() => this.StateMachine.currentState.AnimationFinishTrigger();
+    /// <summary>
+    /// draw two line, one for groundcheck ,another for wallcheck
+    /// </summary>
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawLine(groundCheck.position, new Vector3(groundCheck.position.x, groundCheck.position.y - groundCheckDistance));
+        Gizmos.DrawLine(wallCheck.position, new Vector3(wallCheck.position.x + wallCheckDistance, wallCheck.position.y));
+    }
 }
