@@ -13,7 +13,7 @@ public class PlayerState
     protected float yInput;
     protected Rigidbody2D rb;
     protected float stateTimer;
-    protected bool aniTriggerCalled; 
+    protected bool animTriggerCalled; 
     
     public PlayerState(Player _player, PlayerStateMachine _playerStateMachine, string _animBoolName)
     { 
@@ -26,7 +26,7 @@ public class PlayerState
     {
         player.Anim.SetBool(animBoolName, true);
         rb = player.Rb;
-        aniTriggerCalled = false;
+        animTriggerCalled = false;
         //Debug.Log($"enter the {StateMachine.currentState.GetType().Name} state");
     }
 
@@ -46,6 +46,6 @@ public class PlayerState
 
     public void AnimationFinishTrigger()
     {
-        aniTriggerCalled = true;
+        animTriggerCalled = true;
     }
 }   

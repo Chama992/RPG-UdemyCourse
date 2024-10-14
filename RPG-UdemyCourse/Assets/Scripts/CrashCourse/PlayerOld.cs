@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class PlayerOld : Entity
+public class PlayerOld : EntityCrush
 {
     // Start is called before the first frame update
 

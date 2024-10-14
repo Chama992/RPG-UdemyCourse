@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Entity : MonoBehaviour
+public class EntityCrush : MonoBehaviour
 {
     protected Rigidbody2D rb;
     protected Animator animator;

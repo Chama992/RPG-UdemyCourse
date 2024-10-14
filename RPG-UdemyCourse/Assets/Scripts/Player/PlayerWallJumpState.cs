@@ -22,7 +22,6 @@ public class PlayerWallJumpState : PlayerState
 
     public override void Update()
     {
-        stateTimer -= Time.deltaTime;
         if (stateTimer < 0)
             StateMachine.ChangeState(player.AirState);
         if (player.IsGroundChecked())

@@ -2,13 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : Entity
 {
     public bool IsBusy { get; private set; }
-    #region Components
-    public Animator Anim { get; private set; }
-    public Rigidbody2D Rb { get; private set; }
-    #endregion
+
     #region PlayerStates
     public PlayerStateMachine StateMachine { get; private set;  }
     public PlayerIdleState IdleState { get; private set; }
@@ -38,16 +35,11 @@ public class Player : MonoBehaviour
     [Header("Attack Info")]
     [SerializeField] public Vector2[] attackMove;
     public float dashDir { get; private set; }
-    [Header("CollisionCheck Info")]
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private float groundCheckDistance;
-    [SerializeField] private LayerMask whatIsGround;
-    [SerializeField] private Transform wallCheck;
-    [SerializeField] private float wallCheckDistance;
-    public int facingDir { get; private set;  } = 1;
-    public bool facingRight { get; private set; } = true;
-    private void Awake()
+
+
+    protected override void Awake()
     {
+        base.Awake();
         ///use statemachine,player can switch to any state
         StateMachine = new PlayerStateMachine();
         IdleState = new PlayerIdleState(this, StateMachine, "Idle");
@@ -60,14 +52,14 @@ public class Player : MonoBehaviour
         PrimaryAttackState = new PlayerPrimaryAttackState(this, StateMachine, "Attack");
     }
 
-    private void Start()
+    protected override void Start()
     {
-        Anim = GetComponentInChildren<Animator>();
-        Rb = GetComponent<Rigidbody2D>();
+        base.Start();
         StateMachine.Initialize(IdleState);
     }
-    private void Update()
+    protected override void Update()
     {
+        base.Update();
         StateMachine.currentState.Update();
         CheckDashActive();
     }
@@ -82,57 +74,6 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(_seconds);
         IsBusy = false;
     }
-    #region Collision
-    /// <summary>
-    /// check if player on the ground
-    /// </summary>
-    /// <returns></returns>
-    public bool IsGroundChecked() => Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckDistance, whatIsGround);
-    /// <summary>
-    /// check if player near or on the wall
-    /// </summary>
-    /// <returns></returns>
-    public bool IsWallChecked() => Physics2D.Raycast(wallCheck.position, Vector2.right * facingDir, wallCheckDistance, whatIsGround);
-
-    #endregion
-    #region Velocity
-    /// <summary>
-    /// change player's velocity
-    /// </summary>
-    /// <param name="_xVelocity"></param>
-    /// <param name="_yVelocity"></param>
-    public void SetVelocity( float _xVelocity, float _yVelocity)
-    {
-        Rb.velocity =new Vector2(_xVelocity, _yVelocity);
-        FlipControl(_xVelocity);
-    }
-    /// <summary>
-    /// remove the player's velocity Don't mOVE 
-    /// </summary>
-    public void ZeroVelocity() => Rb.velocity = Vector2.zero;
-    #endregion
-    #region Flip
-    /// <summary>
-    /// just like what the method'name ,just flip
-    /// </summary>
-    private void Flip()
-    {
-        facingDir *= -1;
-        facingRight = !facingRight;
-        transform.Rotate(0, 180, 0);
-    }
-    /// <summary>
-    /// check if player really need to flip
-    /// </summary>
-    /// <param name="_x"></param>
-    private void FlipControl(float _x)
-    {
-        if (_x > 0 && !facingRight)
-            Flip();
-        else if ( _x < 0 && facingRight)
-            Flip();
-    }
-    #endregion
     /// <summary>
     /// dash has the highest priority,so this method born
     /// </summary>
@@ -157,12 +98,4 @@ public class Player : MonoBehaviour
     /// use for check the currentstate anim finished?
     /// </summary>
     public void AnimationTrigger() => this.StateMachine.currentState.AnimationFinishTrigger();
-    /// <summary>
-    /// draw two line, one for groundcheck ,another for wallcheck
-    /// </summary>
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawLine(groundCheck.position, new Vector3(groundCheck.position.x, groundCheck.position.y - groundCheckDistance));
-        Gizmos.DrawLine(wallCheck.position, new Vector3(wallCheck.position.x + wallCheckDistance, wallCheck.position.y));
-    }
 }
