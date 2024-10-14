@@ -5,7 +5,7 @@ using UnityEngine;
 public class Enemy : Entity
 {
     public EnemyStateMachine EnemyStateMachine { get; private set; }
-    public Transform player;
+    [HideInInspector]public Transform player;
     [Header("Move Info")]
     public float moveSpeed;
     public float idleTime;
@@ -53,5 +53,10 @@ public class Enemy : Entity
             return true;
         else
             return false;
+    }
+
+    public override void GetDamage()
+    {
+        base.GetDamage();
     }
 }

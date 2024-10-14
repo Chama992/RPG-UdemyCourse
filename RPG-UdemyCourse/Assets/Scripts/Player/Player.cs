@@ -27,6 +27,7 @@ public class Player : Entity
     [SerializeField] public float wallSlideYFastSpeedCoefficient;
     [SerializeField] public float wallJumpXMoveSpeed;
     [SerializeField] public float wallJumpDuration;
+    [SerializeField] public float wallJumpForce;
     [Header("Dash Info")]
     [SerializeField] public float dashDuration;
     [SerializeField] public float dashSpeed;
@@ -35,8 +36,6 @@ public class Player : Entity
     [Header("Attack Info")]
     [SerializeField] public Vector2[] attackMove;
     public float dashDir { get; private set; }
-
-
     protected override void Awake()
     {
         base.Awake();
@@ -98,4 +97,8 @@ public class Player : Entity
     /// use for check the currentstate anim finished?
     /// </summary>
     public void AnimationTrigger() => this.StateMachine.currentState.AnimationFinishTrigger();
+    public override void GetDamage()
+    {
+        base.GetDamage();
+    }
 }

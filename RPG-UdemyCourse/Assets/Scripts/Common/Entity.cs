@@ -7,6 +7,7 @@ public class Entity : MonoBehaviour
     #region Components
     public Animator Anim { get; private set; }
     public Rigidbody2D Rb { get; private set; }
+    public EntityFX FlashFX { get; private set; }
     #endregion
     [Header("CollisionCheck Info")]
     [SerializeField] protected Transform groundCheck;
@@ -14,8 +15,18 @@ public class Entity : MonoBehaviour
     [SerializeField] protected LayerMask whatIsGround;
     [SerializeField] protected Transform wallCheck;
     [SerializeField] protected float wallCheckDistance;
+    [SerializeField] public Transform AttackCheck;
+    [SerializeField] public float AttackCheckRadius;
+    #region FacingDir
     public int facingDir { get; private set; } = 1;
     public bool facingRight { get; private set; } = true;
+    #endregion
+    #region Knock
+    [Header("Knock Info")]
+    public Vector2 knockForce;
+    public float knockBackDuration;
+    private bool isKnocked;
+    #endregion
     protected virtual void Awake()
     {
         
@@ -25,6 +36,7 @@ public class Entity : MonoBehaviour
     {
         Anim = GetComponentInChildren<Animator>();
         Rb = GetComponent<Rigidbody2D>();
+        FlashFX = GetComponent<EntityFX>();
     }
 
     // Update is called once per frame
@@ -50,6 +62,7 @@ public class Entity : MonoBehaviour
     {
         Gizmos.DrawLine(groundCheck.position, new Vector3(groundCheck.position.x, groundCheck.position.y - groundCheckDistance));
         Gizmos.DrawLine(wallCheck.position, new Vector3(wallCheck.position.x + wallCheckDistance * facingDir, wallCheck.position.y));
+        Gizmos.DrawWireSphere(AttackCheck.position, AttackCheckRadius);
     }
     #endregion
     #region Flip
@@ -82,12 +95,22 @@ public class Entity : MonoBehaviour
     /// <param name="_yVelocity"></param>
     public virtual void SetVelocity(float _xVelocity, float _yVelocity)
     {
+        if (isKnocked)
+            return;
         Rb.velocity = new Vector2(_xVelocity, _yVelocity);
         FlipControl(_xVelocity);
     }
-    /// <summary>
-    /// remove the player's velocity Don't mOVE 
-    /// </summary>
-    public virtual void SetZeroVelocity() => Rb.velocity = Vector2.zero;
     #endregion
+    public virtual void GetDamage()
+    {
+        FlashFX.StartCoroutine("FlashFX");
+        StartCoroutine("KnockBack");
+    }
+    protected virtual IEnumerator KnockBack()
+    {
+        isKnocked = true;
+        Rb.velocity = new Vector2(knockForce.x * -facingDir, knockForce.y);
+        yield return new WaitForSeconds(knockBackDuration);
+        isKnocked = false;
+    }
 }

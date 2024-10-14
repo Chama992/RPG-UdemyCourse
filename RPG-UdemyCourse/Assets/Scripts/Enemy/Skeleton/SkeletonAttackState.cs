@@ -11,7 +11,7 @@ public class SkeletonAttackState : SkeletonEnemyState
     public override void Enter()
     {
         base.Enter();
-        enemy.SetZeroVelocity();
+        enemy.SetVelocity(0,0);
         enemy.lastTimeAttack = Time.time;
     }
 

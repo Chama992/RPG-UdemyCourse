@@ -18,9 +18,11 @@ public class PlayerPrimaryAttackState : PlayerState
         if (ComboCounter > 2 || Time.time - lastTimeAttacked > ComboWindow)
             ComboCounter = 0;
         player.Anim.SetInteger("ComboCounter", ComboCounter);
-        float attackDir = player.facingDir;
+        float attackDir;
         if (xInput != 0)
             attackDir = xInput;
+        else
+            attackDir = player.facingDir;
         player.SetVelocity(player.attackMove[ComboCounter].x * attackDir, player.attackMove[ComboCounter].y);
         stateTimer = .1f;// move a little
     }
@@ -37,7 +39,7 @@ public class PlayerPrimaryAttackState : PlayerState
     {
         base.Update();
         if (stateTimer < 0)
-            player.SetZeroVelocity();
+            player.SetVelocity(0,0);
         if (animTriggerCalled)
             StateMachine.ChangeState(player.IdleState);
     }
